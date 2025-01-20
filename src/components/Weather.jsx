@@ -1,7 +1,7 @@
-import { API_KEY, BASE_URL } from '../utils/constants.js'
-import { useState, useEffect } from 'react'
+import { API_KEY, BASE_URL, WEATHER_CACHE_TIME } from '../utils/constants.js';
+import { useEffect, useState } from 'react';
 
-const Weather = ({ city }) => {
+const Weather = ({ city, timeStamp }) => {
   const [weatherData, setWeatherData] = useState({})
   const [message, setMessage] = useState('Enter city name')
 
@@ -18,32 +18,23 @@ const Weather = ({ city }) => {
         country: data.sys.country,
         temp: data.main.temp,
         pressure: data.main.pressure,
-        sunset: data.sys.sunset * 1000
+        sunset: data.sys.sunset * 1000,
+        cityName: city,
+        timeStamp: Date.now()
       })
+      console.log(`Нажатие на кнопку: ${ timeStamp }, полученные данные: ${weatherData.timeStamp}`);
       setMessage('')
     } catch (e) {
       setMessage(e.message)
-    }
-    // const url = `${BASE_URL}?q=${city}&appid=${API_KEY}&units=metric`
-    // fetch(url)
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     setWeatherData({
-    //         city: data.name,
-    //         country: data.sys.country,
-    //         temp: data.main.temp,
-    //         pressure: data.main.pressure,
-    //         sunset: data.sys.sunset * 1000
-    //       }
-    //     )
-    //     setMessage('')
-    //   })
-    //   .catch(() => {setMessage('Enter correct city name')})
+    } 
   }
 
   useEffect(() => {
-    getWeather()
-  }, [city])
+    if(city && !(city===weatherData.cityName && (timeStamp - weatherData.timeStamp) < WEATHER_CACHE_TIME)) {
+      getWeather()
+    }
+  })
+
 
   return (
     <div className={'infoWeath'}>
